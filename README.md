@@ -1,5 +1,5 @@
 ## A fast, batched Bi-RNN(GRU) encoder & attention decoder PyTorch implementation
-Usage: Please refer to offical pytorch tutorial on attention-RNN machine translation tas, except that this implementation
+Usage: Please refer to offical pytorch tutorial on attention-RNN machine translation, except that this implementation
 handles batched inputs, and that it implements a slight different attention mechanism.<br>
 To find out the formula-level difference of implementation, illustrations below will help a lot.<br>
 <br>
