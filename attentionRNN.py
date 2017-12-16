@@ -59,10 +59,6 @@ class Attn(nn.Module):
         '''
         max_len = encoder_outputs.size(0)
         this_batch_size = encoder_outputs.size(1)
-        # For storing attention energies
-        attn_energies = Variable(torch.zeros(this_batch_size, max_len))
-        if self.config.USE_CUDA:
-            attn_energies = attn_energies.cuda()
         H = hidden.repeat(max_len,1,1).transpose(0,1)
         encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
         attn_energies = self.score(H,encoder_outputs) # compute attention score
