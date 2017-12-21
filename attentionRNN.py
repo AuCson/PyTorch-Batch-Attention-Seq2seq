@@ -42,7 +42,7 @@ class Attn(nn.Module):
         self.attn = nn.Linear(self.hidden_size * 2, hidden_size)
         self.v = nn.Parameter(torch.rand(hidden_size))
         stdv = 1. / math.sqrt(self.v.size(0))
-        self.v.data.normal_(mean=torch.zeros(hidden_size), std=stdv)
+        self.v.data.normal_(mean=0, std=stdv)
         # end of update
         self.softmax = nn.Softmax()
 
