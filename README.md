@@ -12,7 +12,7 @@ http://images2015.cnblogs.com/blog/670089/201610/670089-20161012111504671-910168
 <br>
 PyTorch version attention decoder fed "word_embedding" to compute attention weights,
 while in the origin paper it is supposed to be "encoder_outputs". In this repository, 
-we implemented the origin attention decoder according to the paper(The only difference is that activation:tanh is omitted)<br>
+we implemented the origin attention decoder according to the paper<br>
 <br>
 ## Speed up with batched tensor manipulation
 PyTorch supports element-wise fetching and assigning tensor values during procedure, but actually it is slow especially when running on GPU. In a tutorial(https://github.com/spro/practical-pytorch),
