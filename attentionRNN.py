@@ -43,7 +43,6 @@ class Attn(nn.Module):
         self.v = nn.Parameter(torch.rand(hidden_size))
         stdv = 1. / math.sqrt(self.v.size(0))
         self.v.data.normal_(mean=0, std=stdv)
-        # end of update
         self.softmax = nn.Softmax()
 
     def forward(self, hidden, encoder_outputs):
@@ -63,7 +62,7 @@ class Attn(nn.Module):
         return self.softmax(attn_energies).unsqueeze(1) # normalize with softmax
 
     def score(self, hidden, encoder_outputs):
-        energy = self.attn(torch.cat([hidden, encoder_outputs], 2)) # [B*T*2H]->[B*T*H]
+        energy = F.tanh(self.attn(torch.cat([hidden, encoder_outputs], 2))) # [B*T*2H]->[B*T*H]
         energy = energy.transpose(2,1) # [B*H*T]
         v = self.v.repeat(encoder_outputs.data.shape[0],1).unsqueeze(1) #[B*1*H]
         energy = torch.bmm(v,energy) # [B*1*T]
