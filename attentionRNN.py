@@ -43,7 +43,6 @@ class Attn(nn.Module):
         self.v = nn.Parameter(torch.rand(hidden_size))
         stdv = 1. / math.sqrt(self.v.size(0))
         self.v.data.normal_(mean=0, std=stdv)
-        self.softmax = nn.Softmax()
 
     def forward(self, hidden, encoder_outputs):
         '''
@@ -59,7 +58,7 @@ class Attn(nn.Module):
         H = hidden.repeat(max_len,1,1).transpose(0,1)
         encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
         attn_energies = self.score(H,encoder_outputs) # compute attention score
-        return self.softmax(attn_energies).unsqueeze(1) # normalize with softmax
+        return F.softmax(attn_energies).unsqueeze(1) # normalize with softmax
 
     def score(self, hidden, encoder_outputs):
         energy = F.tanh(self.attn(torch.cat([hidden, encoder_outputs], 2))) # [B*T*2H]->[B*T*H]
@@ -97,19 +96,24 @@ class BahdanauAttnDecoderRNN(nn.Module):
             decoder output
         Note: we run this one step at a time i.e. you should use a outer loop 
             to process the whole sequence
+        Tip(update):
+        EncoderRNN may be bidirectional or have multiple layers, so the shape of hidden states can be 
+        different from that of DecoderRNN
+        You may have to manually guarantee that they have the same dimension outside this function,
+        e.g, select the encoder hidden state of the foward/backward pass.
         '''
         # Get the embedding of the current input word (last output word)
-        word_embedded = self.embedding(word_input).view(1, word_input.data.shape[0], -1) # (1,B,N)
+        word_embedded = self.embedding(word_input).view(1, word_input.size(0), -1) # (1,B,V)
         word_embedded = self.dropout(word_embedded)
         # Calculate attention weights and apply to encoder outputs
         attn_weights = self.attn(last_hidden[-1], encoder_outputs)
-        context = attn_weights.bmm(encoder_outputs.transpose(0, 1))  # (B,1,N)
-        context = context.transpose(0, 1)  # (1,B,N)
+        context = attn_weights.bmm(encoder_outputs.transpose(0, 1))  # (B,1,V)
+        context = context.transpose(0, 1)  # (1,B,V)
         # Combine embedded input word and attended context, run through RNN
         rnn_input = torch.cat((word_embedded, context), 2)
         #rnn_input = self.attn_combine(rnn_input) # use it in case your size of rnn_input is different
         output, hidden = self.gru(rnn_input, last_hidden)
-        output = output.squeeze(0)  # (1,B,N)->(B,N)
+        output = output.squeeze(0)  # (1,B,V)->(B,V)
         context = context.squeeze(0)
         output = F.log_softmax(self.out(torch.cat((output, context), 1)))
         # Return final output, hidden state
