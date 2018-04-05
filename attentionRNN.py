@@ -114,7 +114,9 @@ class BahdanauAttnDecoderRNN(nn.Module):
         #rnn_input = self.attn_combine(rnn_input) # use it in case your size of rnn_input is different
         output, hidden = self.gru(rnn_input, last_hidden)
         output = output.squeeze(0)  # (1,B,V)->(B,V)
-        context = context.squeeze(0)
-        output = F.log_softmax(self.out(torch.cat((output, context), 1)))
+        # context = context.squeeze(0)
+        # update: "context" input before final layer can be problematic.
+        # output = F.log_softmax(self.out(torch.cat((output, context), 1)))
+        output = F.log_softmax(self.out(output))
         # Return final output, hidden state
         return output, hidden
