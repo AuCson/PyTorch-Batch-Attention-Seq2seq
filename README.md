@@ -1,4 +1,4 @@
-## A fast, batched Bi-RNN(GRU) encoder & attention decoder implementation in PyTorch
+# A fast, batched Bi-RNN(GRU) encoder & attention decoder implementation in PyTorch
 Usage: Please refer to offical pytorch tutorial on attention-RNN machine translation, except that this implementation
 handles batched inputs, and that it implements a slightly different attention mechanism.<br>
 To find out the formula-level difference of implementation, illustrations below will help a lot.<br>
@@ -13,7 +13,9 @@ http://images2015.cnblogs.com/blog/670089/201610/670089-20161012111504671-910168
 PyTorch version attention decoder fed "word_embedding" to compute attention weights,
 while in the origin paper it is supposed to be "encoder_outputs". In this repository, 
 we implemented the origin attention decoder according to the paper<br>
-updateL dynamic encoder added and does not require inputs to be sorted by length in a batch.
+
+**Update: dynamic encoder added and does not require inputs to be sorted by length in a batch.**
+
 <br>
 ## Speed up with batched tensor manipulation
 PyTorch supports element-wise fetching and assigning tensor values during procedure, but actually it is slow especially when running on GPU. In a tutorial(https://github.com/spro/practical-pytorch),
