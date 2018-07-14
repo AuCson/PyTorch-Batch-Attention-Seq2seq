@@ -1,3 +1,4 @@
+
 import torch
 from torch import nn
 from torch.autograd import Variable
@@ -33,6 +34,40 @@ class EncoderRNN(nn.Module):
         outputs = outputs[:, :, :self.hidden_size] + outputs[:, :, self.hidden_size:]  # Sum bidirectional outputs
         return outputs, hidden
 
+class DynamicEncoder(nn.Module):
+    def __init__(self, input_size, embed_size, hidden_size, n_layers=1, dropout=0.5):
+        super().__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.embed_size = embed_size
+        self.n_layers = n_layers
+        self.dropout = dropout
+        self.embedding = nn.Embedding(input_size, embed_size)
+        self.gru = nn.GRU(embed_size, hidden_size, n_layers, bidirectional=True)
+
+    def forward(self, input_seqs, input_lens, hidden=None):
+        """
+        forward procedure. **No need for inputs to be sorted**
+        :param input_seqs: Variable of [T,B]
+        :param hidden:
+        :param input_lens: *numpy array* of len for each input sequence
+        :return:
+        """
+        batch_size = input_seqs.size(1)
+        embedded = self.embedding(input_seqs)
+        embedded = embedded.transpose(0, 1)  # [B,T,E]
+        sort_idx = np.argsort(-input_lens)
+        unsort_idx = cuda_(torch.LongTensor(np.argsort(sort_idx)))
+        input_lens = input_lens[sort_idx]
+        sort_idx = cuda_(torch.LongTensor(sort_idx))
+        embedded = embedded[sort_idx].transpose(0, 1)  # [T,B,E]
+        packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_lens)
+        outputs, hidden = self.gru(packed, hidden)
+        outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
+        outputs = outputs[:, :, :self.hidden_size] + outputs[:, :, self.hidden_size:]
+        outputs = outputs.transpose(0, 1)[unsort_idx].transpose(0, 1).contiguous()
+        hidden = hidden.transpose(0, 1)[unsort_idx].transpose(0, 1).contiguous()
+        return outputs, hidden
 
 class Attn(nn.Module):
     def __init__(self, method, hidden_size):
