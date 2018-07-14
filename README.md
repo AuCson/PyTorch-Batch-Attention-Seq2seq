@@ -17,7 +17,9 @@ we implemented the origin attention decoder according to the paper<br>
 **Update: dynamic encoder added and does not require inputs to be sorted by length in a batch.**
 
 <br>
+
 ## Speed up with batched tensor manipulation
+
 PyTorch supports element-wise fetching and assigning tensor values during procedure, but actually it is slow especially when running on GPU. In a tutorial(https://github.com/spro/practical-pytorch),
 attention values are assigned element-wise; it's absolutely correct(and intuitive from formulas in paper), but slow on our GPU.
 Thus, we re-implemented a real batched tensor manipulating version, and it achieves <b>more than 10X speed improvement.</b><br>
