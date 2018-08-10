@@ -117,7 +117,7 @@ class BahdanauAttnDecoderRNN(nn.Module):
         self.attn = Attn('concat', hidden_size)
         self.gru = nn.GRU(hidden_size + embed_size, hidden_size, n_layers, dropout=dropout_p)
         #self.attn_combine = nn.Linear(hidden_size + embed_size, hidden_size)
-        self.out = nn.Linear(hidden_size * 2, output_size)
+        self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, word_input, last_hidden, encoder_outputs):
         '''
