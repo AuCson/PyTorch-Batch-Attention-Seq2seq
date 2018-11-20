@@ -79,12 +79,14 @@ class Attn(nn.Module):
         stdv = 1. / math.sqrt(self.v.size(0))
         self.v.data.normal_(mean=0, std=stdv)
 
-    def forward(self, hidden, encoder_outputs):
+    def forward(self, hidden, encoder_outputs, src_len=None):
         '''
         :param hidden: 
             previous hidden state of the decoder, in shape (layers*directions,B,H)
         :param encoder_outputs:
             encoder outputs from Encoder, in shape (T,B,H)
+        :param src_len:
+            used for masking. NoneType or tensor in shape (B) indicating sequence length
         :return
             attention energies in shape (B,T)
         '''
@@ -93,6 +95,14 @@ class Attn(nn.Module):
         H = hidden.repeat(max_len,1,1).transpose(0,1)
         encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
         attn_energies = self.score(H,encoder_outputs) # compute attention score
+        
+        if src_len is not None:
+            mask = []
+            for b in range(src_len.size(0)):
+                mask.append([0] * src_len[b].item() + [1] * (encoder_outputs.size(1) - src_len[b].item()))
+            mask = cuda_(torch.ByteTensor(mask).unsqueeze(1)) # [B,1,T]
+            attn_energies = attn_energies.masked_fill(mask, -1e18)
+        
         return F.softmax(attn_energies).unsqueeze(1) # normalize with softmax
 
     def score(self, hidden, encoder_outputs):
