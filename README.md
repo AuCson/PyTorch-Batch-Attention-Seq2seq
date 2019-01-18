@@ -1,4 +1,7 @@
 # A fast, batched Bi-RNN(GRU) encoder & attention decoder implementation in PyTorch
+
+**This code is written in PyTorch 0.2. By the time the PyTorch has released their 1.0 version, there are plenty of outstanding seq2seq learning packages built on PyTorch, such as OpenNMT, AllenNLP and etc. You can learn from their source code.**
+
 Usage: Please refer to offical pytorch tutorial on attention-RNN machine translation, except that this implementation
 handles batched inputs, and that it implements a slightly different attention mechanism.<br>
 To find out the formula-level difference of implementation, illustrations below will help a lot.<br>
